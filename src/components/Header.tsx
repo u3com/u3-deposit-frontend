@@ -6,7 +6,7 @@ export default function Header() {
     <header className="absolute top-0 left-0 w-full p-2">
       <div className="flex justify-between items-center py-6 gap-2 mx-auto px-5 w-full max-w-7xl">
         <Link to="/">
-          <img src="/logo.png" alt="logo" className="h-[50px] w-auto" />
+          <img src="logo.png" alt="logo" className="h-[50px] w-auto" />
         </Link>
         <div className="flex gap-2"></div>
         <ConnectBtn />
