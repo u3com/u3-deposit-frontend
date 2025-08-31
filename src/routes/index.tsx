@@ -2,11 +2,11 @@ import Header from '@/components/Header'
 import { useWeb3Kit } from '@/components/Web3Kit'
 import { Configs, NetInfos, type CaipNetID } from '@/config'
 import { isProd } from '@/env'
-import idlU3Deposit from '@/json/u3_deposit.json'
+import idlU3Deposit from '@/solfile/u3_deposit.json'
 import { handleError } from '@/lib/mutils'
 import { waitTronTx } from '@/lib/tron'
 import { cn } from '@/lib/utils'
-import { type U3Deposit } from '@/types/u3_deposit'
+import { type U3Deposit } from '@/solfile/u3_deposit'
 import { AnchorProvider, BN, Program, setProvider } from '@coral-xyz/anchor'
 import {
   getAssociatedTokenAddress,
@@ -130,7 +130,7 @@ function App() {
               'function deposit(uint256 amount, string calldata email) external',
             ]),
             functionName: 'deposit',
-            address: config.deposit as Address,
+            address: deposit,
             args: [amountBn, email],
           })
           hashDeposit = await eipW.data.writeContract({ ...simuDeposit.request, account: user })
