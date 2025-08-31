@@ -1,5 +1,5 @@
 {
-  "address": "Hi5xc7nKLcVUeZAU2rE1hMSvcCjrZP3PBUENJnqTgHtM",
+  "address": "EKxafeWX9P6QeDo61gvRftMp8bdEJkphfbH9DfVaTm4j",
   "metadata": {
     "name": "u3_deposit",
     "version": "0.1.0",
@@ -9,7 +9,16 @@
   "instructions": [
     {
       "name": "deposit",
-      "discriminator": [242, 35, 198, 137, 82, 225, 242, 182],
+      "discriminator": [
+        242,
+        35,
+        198,
+        137,
+        82,
+        225,
+        242,
+        182
+      ],
       "accounts": [
         {
           "name": "user_deposit",
@@ -19,7 +28,18 @@
               {
                 "kind": "const",
                 "value": [
-                  117, 115, 101, 114, 95, 100, 101, 112, 111, 115, 105, 116
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  100,
+                  101,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116
                 ]
               },
               {
@@ -41,7 +61,18 @@
               {
                 "kind": "const",
                 "value": [
-                  100, 101, 112, 111, 115, 105, 116, 95, 112, 111, 111, 108
+                  100,
+                  101,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108
                 ]
               },
               {
@@ -53,12 +84,71 @@
           }
         },
         {
+          "name": "usdt_mint"
+        },
+        {
           "name": "user_usdt_account",
           "writable": true
         },
         {
+          "name": "recipient"
+        },
+        {
           "name": "recipient_usdt_account",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "recipient"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "usdt_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
           "name": "user",
@@ -66,8 +156,11 @@
           "signer": true
         },
         {
-          "name": "token_program",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "name": "token_program"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
           "name": "system_program",
@@ -87,7 +180,16 @@
     },
     {
       "name": "initialize_pool",
-      "discriminator": [95, 180, 10, 172, 84, 174, 232, 40],
+      "discriminator": [
+        95,
+        180,
+        10,
+        172,
+        84,
+        174,
+        232,
+        40
+      ],
       "accounts": [
         {
           "name": "deposit_pool",
@@ -97,7 +199,18 @@
               {
                 "kind": "const",
                 "value": [
-                  100, 101, 112, 111, 115, 105, 116, 95, 112, 111, 111, 108
+                  100,
+                  101,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108
                 ]
               },
               {
@@ -116,8 +229,7 @@
           "signer": true
         },
         {
-          "name": "token_program",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "name": "token_program"
         },
         {
           "name": "system_program",
@@ -133,7 +245,16 @@
     },
     {
       "name": "transfer_admin",
-      "discriminator": [42, 242, 66, 106, 228, 10, 111, 156],
+      "discriminator": [
+        42,
+        242,
+        66,
+        106,
+        228,
+        10,
+        111,
+        156
+      ],
       "accounts": [
         {
           "name": "deposit_pool",
@@ -143,7 +264,18 @@
               {
                 "kind": "const",
                 "value": [
-                  100, 101, 112, 111, 115, 105, 116, 95, 112, 111, 111, 108
+                  100,
+                  101,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108
                 ]
               },
               {
@@ -168,7 +300,16 @@
     },
     {
       "name": "update_recipient",
-      "discriminator": [55, 190, 61, 121, 131, 132, 8, 54],
+      "discriminator": [
+        55,
+        190,
+        61,
+        121,
+        131,
+        132,
+        8,
+        54
+      ],
       "accounts": [
         {
           "name": "deposit_pool",
@@ -178,7 +319,18 @@
               {
                 "kind": "const",
                 "value": [
-                  100, 101, 112, 111, 115, 105, 116, 95, 112, 111, 111, 108
+                  100,
+                  101,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108
                 ]
               },
               {
@@ -205,29 +357,83 @@
   "accounts": [
     {
       "name": "DepositPool",
-      "discriminator": [64, 107, 122, 248, 155, 187, 255, 28]
+      "discriminator": [
+        64,
+        107,
+        122,
+        248,
+        155,
+        187,
+        255,
+        28
+      ]
     },
     {
       "name": "UserDeposit",
-      "discriminator": [69, 238, 23, 217, 255, 137, 185, 35]
+      "discriminator": [
+        69,
+        238,
+        23,
+        217,
+        255,
+        137,
+        185,
+        35
+      ]
     }
   ],
   "events": [
     {
       "name": "AdminTransferred",
-      "discriminator": [255, 147, 182, 5, 199, 217, 38, 179]
+      "discriminator": [
+        255,
+        147,
+        182,
+        5,
+        199,
+        217,
+        38,
+        179
+      ]
     },
     {
       "name": "PoolInitialized",
-      "discriminator": [100, 118, 173, 87, 12, 198, 254, 229]
+      "discriminator": [
+        100,
+        118,
+        173,
+        87,
+        12,
+        198,
+        254,
+        229
+      ]
     },
     {
       "name": "RecipientUpdated",
-      "discriminator": [33, 28, 22, 205, 175, 9, 165, 73]
+      "discriminator": [
+        33,
+        28,
+        22,
+        205,
+        175,
+        9,
+        165,
+        73
+      ]
     },
     {
       "name": "UsdtDeposited",
-      "discriminator": [140, 201, 177, 24, 230, 230, 102, 114]
+      "discriminator": [
+        140,
+        201,
+        177,
+        24,
+        230,
+        230,
+        102,
+        114
+      ]
     }
   ],
   "errors": [
@@ -255,6 +461,11 @@
       "code": 6004,
       "name": "EmailInvalidFormat",
       "msg": "Email must contain @ character"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidRecipient",
+      "msg": "Invalid recipient"
     }
   ],
   "types": [

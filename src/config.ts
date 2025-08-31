@@ -11,8 +11,8 @@ export const Configs: {
     | undefined
 } = {
   [`solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`]: {
-    deposit: 'TEVUcgaaEY13qVPkw5bVZosjfFHQNYHJEpBNakmrmEW',
-    asset: 'HDNNJL4haVkH8LGDgRZarqwfjN6jThP4i3yvM1jeYN46',
+    deposit: '9LtzaxYQeVt3z4yHTfPS11FQJDPs9qsUFbwUJNTR4gUx',
+    asset: 'HbbW1Erfgfu8nM5Y7P4BruviWGkPy5P8oKEKVnCgwwpm',
     assetDecimals: 6,
   },
   [`eip155:${bscTestnet.id}`]: {
@@ -21,13 +21,13 @@ export const Configs: {
     assetDecimals: 18,
   },
   [`eip155:${polygonAmoy.id}`]: {
-    deposit: '0xf8fd7cf2dff74e9c268caca884b501d142116539',
-    asset: '0x5aadfb43ef8daf45dd80f4676345b7676f1d70e3',
+    deposit: '0xeea1026a8080eece2963b44b27edcd4d42361fe1',
+    asset: '0x6e6bc20df92459f2fbcc54fa67afefb057400936',
     assetDecimals: 18,
   },
   [`tron:3`]: {
     // Tron nile testnet
-    deposit: 'TQ4GmNJtH1ic54HcEotRWjUbAac7RiL958',
+    deposit: 'TKANa2o4wCUXELXEuh27sznnUUkzh6pSZk',
     asset: 'TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf',
     assetDecimals: 6,
   },

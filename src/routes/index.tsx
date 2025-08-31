@@ -10,7 +10,7 @@ import { type U3Deposit } from '@/types/u3_deposit'
 import { AnchorProvider, BN, Program, setProvider } from '@coral-xyz/anchor'
 import {
   getAssociatedTokenAddress,
-  getAccount as getSolAccount,
+  TOKEN_PROGRAM_ID
 } from '@solana/spl-token'
 import {
   useAnchorWallet,
@@ -76,7 +76,7 @@ function App() {
         return emailRegex.test(emailOrUID)
       }
       let email = emailOrUID
-       
+
       if (callApi) {
         const { code, data } = await fetch(
           'https://dsbscsol.u3.com/api/index/userQuery',
@@ -105,18 +105,27 @@ function App() {
           console.info('provider:', eipW.data, config)
           if (!eipW.data || !eipPC) return
           const amountBn = parseUnits(amount + '', config.assetDecimals)
-          const hashApprove = await eipW.data.writeContract({
-            abi: erc20Abi,
-            functionName: 'approve',
-            address: config.asset as Address,
-            args: [config.deposit as Address, amountBn],
-          })
-          const receiptApprove = await eipPC.waitForTransactionReceipt({
-            hash: hashApprove,
-          })
-          if (receiptApprove.status !== 'success')
-            throw new Error(`Approve Error: ${receiptApprove.status}`)
-          hashDeposit = await eipW.data.writeContract({
+          const user = eipW.data.account.address;
+          const deposit = config.deposit as Address
+          const asset = config.asset as Address
+          const chainId = await eipPC.getChainId()
+          const allownce = await eipPC.readContract({ abi: erc20Abi, functionName: 'allowance', address: asset, args: [user, deposit] })
+          console.info('eipCheck', { chainId, allownce, user })
+          if (allownce < amountBn) {
+            const simuApprove = await eipPC.simulateContract({
+              account: user,
+              abi: erc20Abi, functionName: 'approve', address: asset, args: [deposit, amountBn],
+            })
+            console.info('simuRes:', simuApprove.result, simuApprove.request)
+            const hashApprove = await eipW.data.writeContract({ ...simuApprove.request, account: user })
+            const receiptApprove = await eipPC.waitForTransactionReceipt({
+              hash: hashApprove,
+            })
+            if (receiptApprove.status !== 'success')
+              throw new Error(`Approve Error: ${receiptApprove.status}`)
+          }
+          const simuDeposit = await eipPC.simulateContract({
+            account: user,
             abi: parseAbi([
               'function deposit(uint256 amount, string calldata email) external',
             ]),
@@ -124,6 +133,7 @@ function App() {
             address: config.deposit as Address,
             args: [amountBn, email],
           })
+          hashDeposit = await eipW.data.writeContract({ ...simuDeposit.request, account: user })
           const receiptDeposit = await eipPC.waitForTransactionReceipt({
             hash: hashDeposit as Hex,
           })
@@ -143,11 +153,10 @@ function App() {
           setProvider(provider)
           const program = new Program<U3Deposit>(idlU3Deposit, provider)
           const depositPool = new PublicKey(config.deposit)
-          const usdtMint = new PublicKey(config.asset)
 
           // Get current pool info
-          const poolAccount =
-            await program.account.depositPool.fetch(depositPool)
+          const poolAccount = await program.account.depositPool.fetch(depositPool)
+          const usdtMint = poolAccount.usdtMint
           const recipient = poolAccount.recipient
 
           // Calculate user deposit PDA
@@ -161,38 +170,25 @@ function App() {
           )
 
           // Get or create user USDT account
-          const userUsdtAccount = await getAssociatedTokenAddress(
-            usdtMint,
-            solW.publicKey,
-          )
-
+          const userUsdtAccount = await getAssociatedTokenAddress(usdtMint, solW.publicKey)
           // Get or create recipient USDT account
-          const recipientUsdtAccount = await getAssociatedTokenAddress(
-            usdtMint,
-            recipient,
-          )
-
-          const recipientBalance = await getSolAccount(
-            provider.connection,
-            recipientUsdtAccount,
-          )
-
-          console.log(
-            `Recipient USDT balance before: ${recipientBalance.amount.toString()}`,
-          )
+          const recipientUsdtAccount = await getAssociatedTokenAddress(usdtMint, recipient)
           const amountBN = new BN(amount * 10 ** config.assetDecimals)
           console.info('amount:', amountBN, amountBN.toString())
+          // deposit
           const tx = await program.methods
             .deposit(amountBN, email)
             .accountsPartial({
               userDeposit,
               depositPool,
+              usdtMint,
               userUsdtAccount,
+              recipient,
               recipientUsdtAccount,
               user: solW.publicKey,
+              tokenProgram: TOKEN_PROGRAM_ID,
             })
             .transaction()
-          await provider.simulate(tx)
           hashDeposit = await provider.sendAndConfirm(tx)
           console.info('solana:', hashDeposit)
           break
@@ -200,21 +196,14 @@ function App() {
         case 'tron': {
           console.info('tron wallet:', tronW)
           const amountBn = parseUnits(amount + '', config.assetDecimals)
-          const tronWeb = new TronWeb({
-            fullHost: NetInfos[netId].rpc!,
-            privateKey: '',
-          })
+          const tronWeb = new TronWeb({ fullHost: NetInfos[netId].rpc! })
           const trc20Contract = tronWeb.contract(erc20Abi, config.asset)
           const allowance = await trc20Contract
             .allowance(tronW.address!, config.deposit)
             .call({ from: tronW.address! })
+          const assetBalance = await trc20Contract.balanceOf(tronW.address!).call({ from: tronW.address! })
           const allowanceBn = BigInt(allowance || 0)
-          console.info(
-            'allowance:',
-            allowance,
-            amountBn,
-            allowanceBn < amountBn,
-          )
+          console.info('allowance:', { allowance, amountBn, assetBalance })
           if (allowanceBn < amountBn) {
             const tx = await tronWeb.transactionBuilder.triggerSmartContract(
               config.asset,
@@ -229,8 +218,7 @@ function App() {
             const { txid } = await tronWeb.trx.sendRawTransaction(
               await tronW.signTransaction(tx.transaction),
             )
-            const txResult = await waitTronTx({ txid, tronWeb })
-            console.info('approvedTx:', txResult)
+            await waitTronTx({ txid, tronWeb })
           }
 
           const txDeposit =
@@ -248,15 +236,12 @@ function App() {
             await tronW.signTransaction(txDeposit.transaction),
           )
           const txResult = await waitTronTx({ txid: sendDeposit.txid, tronWeb })
-          console.info('approvedTx:', txResult)
-          // const depositResult = await tronWeb.trx.sendRawTransaction(singedTxDeposit)
-          // if (depositResult.code !== 0) throw new Error(`Deposit error: code=${depositResult.code}, ${depositResult.message}`)
           hashDeposit = txResult.id
           break
         }
       }
       toast.success('Deposit Tx Success')
-       
+
       if (callApi) {
         const upApiRes = await fetch(
           'https://dsbscsol.u3.com/api/index/topUpNow',
