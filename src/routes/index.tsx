@@ -1,12 +1,17 @@
 import Header from '@/components/Header'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { useWeb3Kit, type Web3Kit } from '@/components/Web3Kit'
 import { Configs, NetInfos, type CaipNetID, type ChainType } from '@/config'
 import { isProd, isTest } from '@/env'
-import idlU3Deposit from '@/solfile/u3_deposit.json'
+import { getUserInfoBy, upDepositHash } from '@/lib/apis'
 import { genPromise, handleError, type UnPromise } from '@/lib/mutils'
 import { waitTronTx } from '@/lib/tron'
 import { cn } from '@/lib/utils'
 import { type U3Deposit } from '@/solfile/u3_deposit'
+import idlU3Deposit from '@/solfile/u3_deposit.json'
 import { AnchorProvider, BN, Program, setProvider } from '@coral-xyz/anchor'
 import {
   getAssociatedTokenAddress,
@@ -24,13 +29,8 @@ import { Loader2Icon } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { TronWeb } from 'tronweb'
-import { erc20Abi, parseAbi, parseUnits, type Address, type Hex } from 'viem'
+import { erc20Abi, parseAbi, parseUnits, type Address } from 'viem'
 import { usePublicClient, useSwitchChain, useWalletClient } from 'wagmi'
-import { getUserInfoBy, upDepositHash } from '@/lib/apis'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
 
 export const Route = createFileRoute('/')({
   component: App,

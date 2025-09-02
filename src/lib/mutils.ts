@@ -36,8 +36,8 @@ export function handleError(error: any) {
 export type PromiseStatus = 'pending' | 'fulfilled' | 'rejected'
 
 export function genPromise<T>() {
-  let reslove = (res: T) => {}
-  let rejected = (error?: any) => {}
+  let reslove = (_res: T) => {}
+  let rejected = (_error?: any) => {}
   let status: PromiseStatus = 'pending'
   let value: T | undefined
   let error: any
