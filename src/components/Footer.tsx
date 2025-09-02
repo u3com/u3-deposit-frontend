@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { FiFacebook, FiInstagram } from 'react-icons/fi'
 import { RiTwitterXLine } from 'react-icons/ri'
+import logo2 from '/logo2.png'
 
 const socials = [
   { link: '/#facebook', icon: <FiFacebook /> },
@@ -41,7 +42,7 @@ export function Footer() {
         <div className="w-full h-[1px] border-t-2 border-dashed border-[#92949f]"></div>
         <div className="w-full flex gap-8 justify-between flex-wrap">
           <div className="flex-1 min-w-[20rem] flex flex-col gap-6 items-center">
-            <img src="logo2.png" className="h-8 w-auto" />
+            <img src={logo2} className="h-8 w-auto" />
             <div className="text-center">
               Aims to create a "user-led Web3 future". It is a global technology
               investment institution that focuses on cutting-edge technologies

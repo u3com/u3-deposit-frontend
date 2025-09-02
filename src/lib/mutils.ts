@@ -1,5 +1,13 @@
 import { toast } from 'sonner'
 
+export type UnPromise<
+  T extends ((...args: any[]) => Promise<any>) | Promise<any>,
+> = T extends (...args: any[]) => Promise<infer U>
+  ? U
+  : T extends Promise<infer M>
+    ? M
+    : never
+
 export const shortStr = (v?: string, count = 6, endCount = 5) => {
   if (!v) return ''
   if (v.length <= count + endCount) return v
@@ -23,4 +31,36 @@ export function getErrorMsg(error: any) {
 export function handleError(error: any) {
   console.error(error)
   toast.error(getErrorMsg(error))
+}
+
+export type PromiseStatus = 'pending' | 'fulfilled' | 'rejected'
+
+export function genPromise<T>() {
+  let reslove = (res: T) => {}
+  let rejected = (error?: any) => {}
+  let status: PromiseStatus = 'pending'
+  let value: T | undefined
+  let error: any
+  const promise = new Promise<T>((_reslove, _rejected) => {
+    reslove = (res) => {
+      if (status == 'pending') {
+        status = 'fulfilled'
+        value = res
+        _reslove(res)
+      }
+    }
+    rejected = (err) => {
+      if (status == 'pending') {
+        status = 'rejected'
+        error = err
+        _rejected(err)
+      }
+    }
+  })
+  return {
+    promise,
+    reslove,
+    rejected,
+    getStatus: () => ({ status, value, error }),
+  }
 }
