@@ -31,7 +31,10 @@ if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      <RouterProvider basepath={import.meta.env.VITE_BASE_URL} router={router} />
+      <RouterProvider
+        basepath={import.meta.env.VITE_BASE_URL}
+        router={router}
+      />
     </StrictMode>,
   )
 }

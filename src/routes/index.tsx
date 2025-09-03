@@ -1,13 +1,18 @@
 import Header from '@/components/Header'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useWeb3Kit, type Web3Kit } from '@/components/Web3Kit'
 import { Configs, NetInfos, type CaipNetID, type ChainType } from '@/config'
 import { isProd, isTest } from '@/env'
 import { getUserInfoBy, upDepositHash } from '@/lib/apis'
-import { genPromise, handleError, type UnPromise } from '@/lib/mutils'
+import { genPromise, handleError, toNumber, type UnPromise } from '@/lib/mutils'
 import { waitTronTx } from '@/lib/tron'
 import { cn } from '@/lib/utils'
 import { type U3Deposit } from '@/solfile/u3_deposit'
@@ -15,7 +20,8 @@ import idlU3Deposit from '@/solfile/u3_deposit.json'
 import { AnchorProvider, BN, Program, setProvider } from '@coral-xyz/anchor'
 import {
   getAssociatedTokenAddress,
-  TOKEN_PROGRAM_ID
+  getAccount,
+  TOKEN_PROGRAM_ID,
 } from '@solana/spl-token'
 import {
   useAnchorWallet,
@@ -40,12 +46,16 @@ const products = ['Card', 'Martin'] as const
 const amounts = [50, 100, 500, 1000]
 const supportNets = ['TRC20', 'BSC', 'Solana', 'Polygon'] as const
 const callApi = isProd || isTest
-type DepositFun = (e: string, c: Exclude<typeof Configs[CaipNetID], undefined>, netId: CaipNetID) => Promise<string>
+type DepositFun = (
+  amountBn: bigint,
+  e: string,
+  c: Exclude<(typeof Configs)[CaipNetID], undefined>,
+  netId: CaipNetID,
+) => Promise<string>
 function App() {
   const [product, setProduct] = useState<(typeof products)[number]>(products[0])
-  const [amount, setAmount] = useState(amounts[0])
   const [emailOrUID, setEmailOrUID] = useState('')
-  const [emailOrUIDConfirm, setEmailOrUIDConfirm] = useState('')
+  const [inputAmount, setInputAmount] = useState('')
   const eipNet = useSwitchChain()
   const eipW = useWalletClient()
   const eipPC = usePublicClient()
@@ -53,23 +63,41 @@ function App() {
   const solConn = useSolConn()
   const tronW = useWallet()
   const refTopUpNow = useRef<HTMLDivElement>(null)
-  const depositByEip: DepositFun = async (email, config) => {
+  const depositByEip: DepositFun = async (amountBn, email, config) => {
     console.info('provider:', eipW.data, config)
-    if (!eipW.data || !eipPC) throw new Error("Need connected!")
-    const amountBn = parseUnits(amount + '', config.assetDecimals)
-    const user = eipW.data.account.address;
+    if (!eipW.data || !eipPC) throw new Error('Need connected!')
+
+    const user = eipW.data.account.address
     const deposit = config.deposit as Address
     const asset = config.asset as Address
     const chainId = await eipPC.getChainId()
-    const allownce = await eipPC.readContract({ abi: erc20Abi, functionName: 'allowance', address: asset, args: [user, deposit] })
+    const balance = await eipPC.readContract({
+      abi: erc20Abi,
+      functionName: 'balanceOf',
+      address: asset,
+      args: [user],
+    })
+    if (balance < amountBn) throw new Error('Balance too low!')
+    const allownce = await eipPC.readContract({
+      abi: erc20Abi,
+      functionName: 'allowance',
+      address: asset,
+      args: [user, deposit],
+    })
     console.info('eipCheck', { chainId, allownce, user })
     if (allownce < amountBn) {
       const simuApprove = await eipPC.simulateContract({
         account: user,
-        abi: erc20Abi, functionName: 'approve', address: asset, args: [deposit, amountBn],
+        abi: erc20Abi,
+        functionName: 'approve',
+        address: asset,
+        args: [deposit, amountBn],
       })
       console.info('simuRes:', simuApprove.result, simuApprove.request)
-      const hashApprove = await eipW.data.writeContract({ ...simuApprove.request, account: user })
+      const hashApprove = await eipW.data.writeContract({
+        ...simuApprove.request,
+        account: user,
+      })
       const receiptApprove = await eipPC.waitForTransactionReceipt({
         hash: hashApprove,
       })
@@ -85,7 +113,10 @@ function App() {
       address: deposit,
       args: [amountBn, email],
     })
-    const hashDeposit = await eipW.data.writeContract({ ...simuDeposit.request, account: user })
+    const hashDeposit = await eipW.data.writeContract({
+      ...simuDeposit.request,
+      account: user,
+    })
     const receiptDeposit = await eipPC.waitForTransactionReceipt({
       hash: hashDeposit,
     })
@@ -93,14 +124,9 @@ function App() {
       throw new Error(`Deposit Error: ${receiptDeposit.status}`)
     return hashDeposit
   }
-  const depositBySol: DepositFun = async (email, config) => {
-    if (!solW) throw new Error("Need connected!")
-    console.info(
-      'sol wallet:',
-      solW.publicKey.toString(),
-      solW,
-      idlU3Deposit,
-    )
+  const depositBySol: DepositFun = async (amountBn, email, config) => {
+    if (!solW) throw new Error('Need connected!')
+    console.info('sol wallet:', solW.publicKey.toString(), solW, idlU3Deposit)
     const provider = new AnchorProvider(solConn.connection, solW, {})
     setProvider(provider)
     const program = new Program<U3Deposit>(idlU3Deposit, provider)
@@ -122,10 +148,23 @@ function App() {
     )
 
     // Get or create user USDT account
-    const userUsdtAccount = await getAssociatedTokenAddress(usdtMint, solW.publicKey)
+    const userUsdtAccount = await getAssociatedTokenAddress(
+      usdtMint,
+      solW.publicKey,
+    )
+    const userUsdtAccountInfo = await getAccount(
+      solConn.connection,
+      userUsdtAccount,
+    ).catch(() => null)
+    console.info('userUsdtInfo:', userUsdtAccountInfo?.amount)
+    if (!userUsdtAccountInfo || userUsdtAccountInfo.amount < amountBn)
+      throw new Error('Balance too low!')
     // Get or create recipient USDT account
-    const recipientUsdtAccount = await getAssociatedTokenAddress(usdtMint, recipient)
-    const amountBN = new BN(amount * 10 ** config.assetDecimals)
+    const recipientUsdtAccount = await getAssociatedTokenAddress(
+      usdtMint,
+      recipient,
+    )
+    const amountBN = new BN(amountBn.toString())
     console.info('amount:', amountBN, amountBN.toString())
     // deposit
     const tx = await program.methods
@@ -144,15 +183,18 @@ function App() {
     return await provider.sendAndConfirm(tx)
   }
 
-  const depositByTron: DepositFun = async (email, config, netId) => {
+  const depositByTron: DepositFun = async (amountBn, email, config, netId) => {
     console.info('tron wallet:', tronW)
-    const amountBn = parseUnits(amount + '', config.assetDecimals)
     const tronWeb = new TronWeb({ fullHost: NetInfos[netId].rpc! })
     const trc20Contract = tronWeb.contract(erc20Abi, config.asset)
+    const assetBalance = await trc20Contract
+      .balanceOf(tronW.address!)
+      .call({ from: tronW.address! })
+    const assetBalanceBn = BigInt(assetBalance || 0)
+    if (assetBalanceBn < amountBn) throw new Error('Balance too low!')
     const allowance = await trc20Contract
       .allowance(tronW.address!, config.deposit)
       .call({ from: tronW.address! })
-    const assetBalance = await trc20Contract.balanceOf(tronW.address!).call({ from: tronW.address! })
     const allowanceBn = BigInt(allowance || 0)
     console.info('allowance:', { allowance, amountBn, assetBalance })
     if (allowanceBn < amountBn) {
@@ -172,17 +214,16 @@ function App() {
       await waitTronTx({ txid, tronWeb })
     }
 
-    const txDeposit =
-      await tronWeb.transactionBuilder.triggerSmartContract(
-        config.deposit,
-        'deposit(uint256,string)',
-        {},
-        [
-          { type: 'uint256', value: amountBn.toString() },
-          { type: 'string', value: email },
-        ],
-        tronW.address!,
-      )
+    const txDeposit = await tronWeb.transactionBuilder.triggerSmartContract(
+      config.deposit,
+      'deposit(uint256,string)',
+      {},
+      [
+        { type: 'uint256', value: amountBn.toString() },
+        { type: 'string', value: email },
+      ],
+      tronW.address!,
+    )
     const sendDeposit = await tronWeb.trx.sendRawTransaction(
       await tronW.signTransaction(txDeposit.transaction),
     )
@@ -190,39 +231,58 @@ function App() {
     return txResult.id
   }
 
-  const doDeposit = async (email: string, w3k: Required<Web3Kit>) => {
+  const doDeposit = async (
+    amountNum: number,
+    email: string,
+    w3k: Required<Web3Kit>,
+  ) => {
     const netId: CaipNetID = `${w3k.conectType}:${w3k.chainId}`
     const config = Configs[netId]!
-    const depositFuns: { [k in ChainType]: (e: string, c: Exclude<typeof Configs[CaipNetID], undefined>, netId: CaipNetID) => Promise<string> } = {
+    const depositFuns: { [k in ChainType]: DepositFun } = {
       eip155: depositByEip,
       solana: depositBySol,
       tron: depositByTron,
     }
-    const hashDeposit = await depositFuns[w3k.conectType](email, config, netId)
+    const amountBn = parseUnits(amountNum.toFixed(6), config.assetDecimals)
+    const hashDeposit = await depositFuns[w3k.conectType](
+      amountBn,
+      email,
+      config,
+      netId,
+    )
     toast.success('Deposit Tx Success')
     return hashDeposit
   }
 
   const refConfirm = useRef(genPromise<boolean>())
-  const [showUInfo, setShowUInfo] = useState<UnPromise<typeof getUserInfoBy> | undefined>()
+  const [showUInfo, setShowUInfo] = useState<
+    UnPromise<typeof getUserInfoBy> | undefined
+  >()
   const { mutate: onTopUpNow, isPending: isBusyTopUpNow } = useMutation({
     onError: handleError,
     mutationFn: async () => {
       const w3k = useWeb3Kit.getState()
       if (!w3k.address) throw new Error('Need connected')
       if (!w3k.chainId || !w3k.conectType) throw new Error('Chain error')
-      if (!emailOrUID || emailOrUID !== emailOrUIDConfirm)
-        throw new Error('Email or UID error')
+      if (!emailOrUID) throw new Error('Email or UID error')
+      if (!inputAmount) throw new Error('Need amount!')
+      const amount = toNumber(inputAmount)
+      if (amount < 1) throw new Error('Require amount >= 1')
       const currentEipChainId = `${eipW.data?.chain.id}`
       console.info('tapupnow:', w3k, currentEipChainId !== w3k.chainId)
       if (
-        w3k.conectType == 'eip155' && (!eipW.data || `${eipW.data.chain.id}` !== w3k.chainId)
+        w3k.conectType == 'eip155' &&
+        (!eipW.data || `${eipW.data.chain.id}` !== w3k.chainId)
       ) {
-        console.info('switchChainBefore:', `${eipW.data?.chain.id}`, w3k.chainId)
+        console.info(
+          'switchChainBefore:',
+          `${eipW.data?.chain.id}`,
+          w3k.chainId,
+        )
         await eipNet.switchChainAsync({ chainId: parseInt(w3k.chainId) })
         await new Promise((reslove) => setTimeout(reslove, 2000))
         console.info('switchChainAfter:', `${eipW.data?.chain.id}`, w3k.chainId)
-        return setTimeout(() => refTopUpNow.current?.click(),200)
+        return setTimeout(() => refTopUpNow.current?.click(), 200)
       }
       let email = emailOrUID
       if (callApi) {
@@ -237,7 +297,7 @@ function App() {
       }
       if (!email) return
       const netId: CaipNetID = `${w3k.conectType}:${w3k.chainId}`
-      const hashDeposit = await doDeposit(email, w3k as any)
+      const hashDeposit = await doDeposit(amount, email, w3k as any)
       if (callApi) {
         await upDepositHash(hashDeposit, product, netId)
         toast.success('Deposit Finished')
@@ -250,35 +310,42 @@ function App() {
   return (
     <div>
       {/* Confirm uinfo */}
-      <Dialog open={Boolean(showUInfo)} onOpenChange={(isOpen) => {
-        if (!isOpen) {
-          setShowUInfo(undefined)
-          refConfirm.current.reslove(false)
-        }
-      }}>
-        <DialogContent >
+      <Dialog
+        open={Boolean(showUInfo)}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setShowUInfo(undefined)
+            refConfirm.current.reslove(false)
+          }
+        }}
+      >
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirm your info?</DialogTitle>
           </DialogHeader>
-          <div className='flex flex-col gap-2'>
-            <div className='grid grid-cols-[1fr_3fr]'>
-              <Label className='mx-auto'>Email</Label>
+          <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-[1fr_3fr]">
+              <Label className="mx-auto">Email</Label>
               <Input disabled type="text" value={showUInfo?.email} />
             </div>
-            <div className='grid grid-cols-[1fr_3fr]'>
-              <Label className='mx-auto'>UID</Label>
+            <div className="grid grid-cols-[1fr_3fr]">
+              <Label className="mx-auto">UID</Label>
               <Input disabled type="text" value={showUInfo?.uid} />
             </div>
           </div>
           <div className="flex items-center gap-5">
-            <Button variant="outline" className='basis-0 flex-1' onClick={() => {
-              refConfirm.current.reslove(false)
-              setShowUInfo(undefined)
-            }}>
+            <Button
+              variant="outline"
+              className="basis-0 flex-1"
+              onClick={() => {
+                refConfirm.current.reslove(false)
+                setShowUInfo(undefined)
+              }}
+            >
               Return to modification
             </Button>
             <Button
-              className='basis-0 flex-1'
+              className="basis-0 flex-1"
               onClick={() => {
                 refConfirm.current.reslove(true)
                 setShowUInfo(undefined)
@@ -342,10 +409,9 @@ function App() {
                 {amounts.map((item) => (
                   <div
                     key={item}
-                    onClick={() => setAmount(item)}
+                    onClick={() => setInputAmount(item + '')}
                     className={cn(
-                      'cursor-pointer bg-white/40 flex flex-nowrap justify-center items-center gap-2 border border-white backdrop-blur-md rounded-lg p-4 text-center',
-                      { 'bg-white text-black': item == amount },
+                      'cursor-pointer bg-white/40 hover:bg-white/60 flex flex-nowrap justify-center items-center gap-2 border border-white backdrop-blur-md rounded-lg p-4 text-center ',
                     )}
                   >
                     {item} {'USDT'}
@@ -354,17 +420,17 @@ function App() {
               </div>
               <input
                 type="text"
+                value={inputAmount}
+                onChange={(e) => setInputAmount(e.target.value || '')}
+                className={inputClassName}
+                placeholder="Enter amount >= 1"
+              />
+              <input
+                type="text"
                 value={emailOrUID}
                 onChange={(e) => setEmailOrUID(e.target.value || '')}
                 className={inputClassName}
                 placeholder="Enter registered email or UID"
-              />
-              <input
-                type="text"
-                value={emailOrUIDConfirm}
-                onChange={(e) => setEmailOrUIDConfirm(e.target.value || '')}
-                className={inputClassName}
-                placeholder="Confirm registered email or UID"
               />
               <div
                 ref={refTopUpNow}

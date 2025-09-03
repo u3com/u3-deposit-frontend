@@ -64,3 +64,12 @@ export function genPromise<T>() {
     getStatus: () => ({ status, value, error }),
   }
 }
+
+export function toNumber(value: any, def: number = 0) {
+  try {
+    const str = typeof value == 'string' ? value : value.toString()
+    return parseFloat(str.trim())
+  } catch (error) {
+    return def
+  }
+}

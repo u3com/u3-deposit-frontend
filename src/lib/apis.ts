@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const isEmail = (emailOrUID: string) => {
-  const emailRegex = /\w[-.\w]*@[-a-z0-9]+(\.[-a-z0-9]+)*\.(com|cn|edu|uk)/gi
+  const emailRegex = /\w[-.\w]*@[-a-z0-9]+/gi
   return emailRegex.test(emailOrUID)
 }
 export async function getUserInfoBy(emailOrUID: string, system: string) {
