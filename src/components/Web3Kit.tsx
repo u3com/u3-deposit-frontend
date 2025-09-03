@@ -4,16 +4,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { shortStr } from '@/lib/mutils'
-import { useWallet as useSolKit } from '@solana/wallet-adapter-react'
-import { useWalletModal as useSolModal } from '@solana/wallet-adapter-react-ui'
-import { useMutation } from '@tanstack/react-query'
-import { useWallet as useTronKit } from '@tronweb3/tronwallet-adapter-react-hooks'
-import { useWalletModal as useTronWalletModal } from '@tronweb3/tronwallet-adapter-react-ui'
-import { useConnectModal as useEipKit } from '@rainbow-me/rainbowkit'
-import { useMemo, useState } from 'react'
-import { create } from 'zustand/react'
-import { Button } from './ui/button'
 import {
   Configs,
   LocalKeys,
@@ -22,9 +12,19 @@ import {
   type ChainType,
 } from '@/config'
 import useCopy from '@/hooks/useCopy'
-import Avatar from 'boring-avatars'
-import { useDisconnect, useDisconnect as useEipDis } from 'wagmi'
 import { upLocalStorage } from '@/hooks/useLocalStorage'
+import { shortStr } from '@/lib/mutils'
+import { useConnectModal as useEipKit } from '@rainbow-me/rainbowkit'
+import { useWallet as useSolKit } from '@solana/wallet-adapter-react'
+import { useWalletModal as useSolModal } from '@solana/wallet-adapter-react-ui'
+import { useMutation } from '@tanstack/react-query'
+import { useWallet as useTronKit } from '@tronweb3/tronwallet-adapter-react-hooks'
+import { useWalletModal as useTronWalletModal } from '@tronweb3/tronwallet-adapter-react-ui'
+import Avatar from 'boring-avatars'
+import { useMemo, useState } from 'react'
+import { useDisconnect as useEipDis } from 'wagmi'
+import { create } from 'zustand/react'
+import { Button } from './ui/button'
 
 export type Web3Kit = {
   conectType?: ChainType
