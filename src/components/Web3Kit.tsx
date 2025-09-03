@@ -23,7 +23,7 @@ import {
 } from '@/config'
 import useCopy from '@/hooks/useCopy'
 import Avatar from 'boring-avatars'
-import { useDisconnect as useEipDis } from 'wagmi'
+import { useDisconnect, useDisconnect as useEipDis } from 'wagmi'
 import { upLocalStorage } from '@/hooks/useLocalStorage'
 
 export type Web3Kit = {
@@ -52,30 +52,7 @@ export function ConnectBtn() {
   const tronWM = useTronWalletModal()
   const eipKit = useEipKit()
   const solM = useSolModal()
-  const onSelectChain = (netId: CaipNetID) => {
-    const [chainType, chainId] = netId.split(':') as [ChainType, string]
-    switch (chainType) {
-      case 'tron':
-        tronWM.setVisible(true)
-        break
-      case 'eip155':
-        eipKit.openConnectModal?.()
-        break
-      case 'solana':
-        solM.setVisible(true)
-        break
-    }
-    useWeb3Kit.setState({ chainId })
-    upLocalStorage(LocalKeys[chainType], chainId)
-    setOpen(false)
-  }
-  const onClick = () => {
-    if (!w3k.address) {
-      setOpen(true)
-    } else {
-      setOpenAcc(true)
-    }
-  }
+
   const eipDis = useEipDis()
   const tronKit = useTronKit()
   const solKit = useSolKit()
@@ -91,6 +68,35 @@ export function ConnectBtn() {
       setOpenAcc(false)
     },
   })
+  const onSelectChain = (netId: CaipNetID) => {
+    const [chainType, chainId] = netId.split(':') as [ChainType, string]
+    onDis()
+    switch (chainType) {
+      case 'tron':
+        tronKit.disconnect()
+        tronWM.setVisible(true)
+        break
+      case 'eip155':
+        eipDis.disconnect()
+        eipKit.openConnectModal?.()
+        break
+      case 'solana':
+        solKit.disconnect()
+        solM.setVisible(true)
+        break
+    }
+    useWeb3Kit.setState({ chainId })
+    upLocalStorage(LocalKeys[chainType], chainId)
+    setOpen(false)
+  }
+  const onClick = () => {
+    if (!w3k.address) {
+      setOpen(true)
+    } else {
+      setOpenAcc(true)
+    }
+  }
+
   const caipNets = useMemo(
     () =>
       Object.keys(Configs).map((item) => ({

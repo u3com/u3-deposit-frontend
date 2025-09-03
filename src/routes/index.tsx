@@ -35,7 +35,7 @@ import { Loader2Icon } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { TronWeb } from 'tronweb'
-import { erc20Abi, parseAbi, parseUnits, type Address } from 'viem'
+import { erc20Abi, parseAbi, parseUnits, toBytes, type Address } from 'viem'
 import { usePublicClient, useSwitchChain, useWalletClient } from 'wagmi'
 
 export const Route = createFileRoute('/')({
@@ -66,7 +66,6 @@ function App() {
   const depositByEip: DepositFun = async (amountBn, email, config) => {
     console.info('provider:', eipW.data, config)
     if (!eipW.data || !eipPC) throw new Error('Need connected!')
-
     const user = eipW.data.account.address
     const deposit = config.deposit as Address
     const asset = config.asset as Address
@@ -140,7 +139,7 @@ function App() {
     // Calculate user deposit PDA
     const [userDeposit] = PublicKey.findProgramAddressSync(
       [
-        Buffer.from('user_deposit'),
+        toBytes('user_deposit'),
         solW.publicKey.toBuffer(),
         depositPool.toBuffer(),
       ],
