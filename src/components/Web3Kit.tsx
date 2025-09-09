@@ -25,6 +25,7 @@ import { useMemo, useState } from 'react'
 import { useDisconnect as useEipDis } from 'wagmi'
 import { create } from 'zustand/react'
 import { Button } from './ui/button'
+import { isTest } from '@/env'
 
 export type Web3Kit = {
   conectType?: ChainType
@@ -33,7 +34,7 @@ export type Web3Kit = {
 }
 
 export const useWeb3Kit = create<Web3Kit>(() => ({}))
-;(window as any).__w3k = useWeb3Kit
+  ; (window as any).__w3k = useWeb3Kit
 export function clearWeb3Kit() {
   useWeb3Kit.setState({
     conectType: undefined,
@@ -102,8 +103,8 @@ export function ConnectBtn() {
       Object.keys(Configs).map((item) => ({
         netId: item as CaipNetID,
         ...NetInfos[item as CaipNetID],
-      })),
-    [],
+      })).filter(item => isTest || !item.isTest),
+    [isTest],
   )
   const { copyTextToClipboard } = useCopy()
   const currentNet = caipNets.find(

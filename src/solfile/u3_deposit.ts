@@ -383,6 +383,11 @@ export type U3Deposit = {
       name: 'invalidRecipient'
       msg: 'Invalid recipient'
     },
+    {
+      code: 6006
+      name: 'invalidAdmin'
+      msg: 'Invalid admin address'
+    },
   ]
   types: [
     {

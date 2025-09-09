@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies & build
         env:
           VITE_BASE_URL: 'u3com-app'
-          VITE_ENV: 'pord'
+          VITE_ENV: 'prod'
         run: |
           bun install --frozen-lockfile
           bun run build

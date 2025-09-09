@@ -292,6 +292,11 @@
       "code": 6005,
       "name": "InvalidRecipient",
       "msg": "Invalid recipient"
+    },
+    {
+      "code": 6006,
+      "name": "invalidAdmin",
+      "msg": "Invalid admin address"
     }
   ],
   "types": [
