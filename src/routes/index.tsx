@@ -126,7 +126,7 @@ function App() {
   const depositBySol: DepositFun = async (amountBn, email, config) => {
     if (!solW) throw new Error('Need connected!')
     console.info('sol wallet:', solW.publicKey.toString(), solW, idlU3Deposit)
-    const provider = new AnchorProvider(solConn.connection, solW, {})
+    const provider = new AnchorProvider(solConn.connection, solW, { commitment: 'confirmed'})
     setProvider(provider)
     const program = new Program<U3Deposit>(idlU3Deposit, provider)
     const depositPool = new PublicKey(config.deposit)
