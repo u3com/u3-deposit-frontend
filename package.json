@@ -37,6 +37,7 @@
     "@tronweb3/tronwallet-adapter-react-ui": "^1.1.11",
     "@tronweb3/tronwallet-adapter-tronlink": "^1.1.12",
     "@tronweb3/tronwallet-adapters": "^1.2.12",
+    "@vitejs/plugin-basic-ssl": "^2.1.0",
     "@vitejs/plugin-legacy": "^7.2.1",
     "axios": "^1.11.0",
     "boring-avatars": "^2.0.1",
@@ -51,6 +52,7 @@
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.0.6",
     "viem": "2.x",
+    "vite-plugin-node-polyfills": "^0.24.0",
     "wagmi": "^2.16.8",
     "zustand": "^5.0.8"
   },

@@ -3,9 +3,8 @@ import path from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import viteReact from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
-
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
-import legacy from '@vitejs/plugin-legacy'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -18,13 +17,9 @@ export default defineConfig(({ mode }) => {
       tanstackRouter({ target: 'react', autoCodeSplitting: true }),
       viteReact(),
       tailwindcss(),
-      legacy(),
+      nodePolyfills({ globals: { Buffer: true } }),
     ],
     appType: 'mpa',
-    // test: {
-    //   globals: true,
-    //   environment: 'jsdom',
-    // },
     base: env.VITE_BASE_URL,
     resolve: {
       alias: {
