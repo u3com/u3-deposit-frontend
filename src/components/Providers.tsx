@@ -81,7 +81,7 @@ function useUpW3KOnStat(
       if (address) {
         useWeb3Kit.setState({ conectType: type, address })
       } else {
-        return () => {}
+        return () => { }
       }
     }
     if (ref.current && !connected) {
@@ -128,6 +128,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <TronWalletModalProvider>
               <SolConnectionProvider
                 endpoint={NetInfos[`solana:${defSolChainId}`].rpc!}
+                config={{
+                  confirmTransactionInitialTimeout: 60000,
+                  commitment: 'confirmed'
+                }}
               >
                 <SolWalletProvider wallets={solWallets} autoConnect>
                   <SolWalletModalProvider>
