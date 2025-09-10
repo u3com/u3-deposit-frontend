@@ -37,6 +37,7 @@
     "@tronweb3/tronwallet-adapter-react-ui": "^1.1.11",
     "@tronweb3/tronwallet-adapter-tronlink": "^1.1.12",
     "@tronweb3/tronwallet-adapters": "^1.2.12",
+    "@vitejs/plugin-legacy": "^7.2.1",
     "axios": "^1.11.0",
     "boring-avatars": "^2.0.1",
     "class-variance-authority": "^0.7.1",
