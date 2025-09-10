@@ -150,7 +150,10 @@ function App() {
     const userUsdtAccount = await getAssociatedTokenAddress(
       usdtMint,
       solW.publicKey,
-    )
+    ).catch(() => null)
+    if (!userUsdtAccount) {
+      throw new Error('Balance too low!')
+    }
     const userUsdtAccountInfo = await getAccount(
       solConn.connection,
       userUsdtAccount,
