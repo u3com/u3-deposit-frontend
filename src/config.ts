@@ -48,7 +48,7 @@ export const Configs: {
     assetDecimals: 6,
   },
   [`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp`]: {
-    deposit: 'EKxafeWX9P6QeDo61gvRftMp8bdEJkphfbH9DfVaTm4j',
+    deposit: 'AEiASqmA6Ddrew1nh4UdPaUXdz4WUEqY7MkF8jcPTdp6',
     asset: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
     assetDecimals: 6,
   },
