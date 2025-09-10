@@ -64,7 +64,7 @@ export const NetInfos: {
   },
   [`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp`]: {
     name: 'Solana',
-    rpc: clusterApiUrl(WalletAdapterNetwork.Mainnet),
+    rpc: 'https://solana-mainnet.g.alchemy.com/v2/gE0g9XK-1DPTMaYUI1kny',
   },
   [`eip155:${bscTestnet.id}`]: { name: bscTestnet.name, isTest: true },
   [`eip155:${bsc.id}`]: { name: bsc.name },
