@@ -1,5 +1,3 @@
-import { WalletAdapterNetwork } from '@solana/wallet-adapter-base'
-import { clusterApiUrl } from '@solana/web3.js'
 import { bsc, bscTestnet, polygon, polygonAmoy } from 'viem/chains'
 import { isTest } from './env'
 // import { solana } from '@reown/appkit/networks'
@@ -59,12 +57,12 @@ export const NetInfos: {
 } = {
   [`solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`]: {
     name: 'Solana Devnet',
-    rpc: clusterApiUrl(WalletAdapterNetwork.Devnet),
+    rpc: 'https://devnet.helius-rpc.com/?api-key=4af995ed-5529-4453-943e-e67c85fbc5f1',
     isTest: true,
   },
   [`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp`]: {
     name: 'Solana',
-    rpc: 'https://solana-mainnet.g.alchemy.com/v2/Y7hC_HVzyjLHIiz-hCo3C',
+    rpc: 'https://mainnet.helius-rpc.com/?api-key=4af995ed-5529-4453-943e-e67c85fbc5f1',
   },
   [`eip155:${bscTestnet.id}`]: { name: bscTestnet.name, isTest: true },
   [`eip155:${bsc.id}`]: { name: bsc.name },

@@ -24,10 +24,9 @@ import {
   TOKEN_PROGRAM_ID,
 } from '@solana/spl-token'
 import {
-  useAnchorWallet,
-  useConnection as useSolConn,
+  useAnchorWallet
 } from '@solana/wallet-adapter-react'
-import { PublicKey } from '@solana/web3.js'
+import { Connection, PublicKey } from '@solana/web3.js'
 import { useMutation } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useWallet } from '@tronweb3/tronwallet-adapter-react-hooks'
@@ -60,7 +59,6 @@ function App() {
   const eipW = useWalletClient()
   const eipPC = usePublicClient()
   const solW = useAnchorWallet()
-  const solConn = useSolConn()
   const tronW = useWallet()
   const refTopUpNow = useRef<HTMLDivElement>(null)
   const depositByEip: DepositFun = async (amountBn, email, config) => {
@@ -123,10 +121,11 @@ function App() {
       throw new Error(`Deposit Error: ${receiptDeposit.status}`)
     return hashDeposit
   }
-  const depositBySol: DepositFun = async (amountBn, email, config) => {
+  const depositBySol: DepositFun = async (amountBn, email, config, netId) => {
     if (!solW) throw new Error('Need connected!')
     console.info('sol wallet:', solW.publicKey.toString(), solW, idlU3Deposit)
-    const provider = new AnchorProvider(solConn.connection, solW, { commitment: 'confirmed' })
+    const connection = new Connection(NetInfos[netId].rpc!, 'confirmed')
+    const provider = new AnchorProvider(connection, solW, { commitment: 'confirmed' })
     setProvider(provider)
     const program = new Program<U3Deposit>(idlU3Deposit, provider)
     const depositPool = new PublicKey(config.deposit)
@@ -155,7 +154,7 @@ function App() {
       throw new Error('Balance too low!')
     }
     const userUsdtAccountInfo = await getAccount(
-      solConn.connection,
+      connection,
       userUsdtAccount,
     ).catch(() => null)
     console.info('userUsdtInfo:', userUsdtAccountInfo?.amount)

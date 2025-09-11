@@ -48,7 +48,7 @@ jobs:
           bun-version: 1.2.21
       - name: Install dependencies & build
         env:
-          VITE_BASE_URL: 'u3com-app'
+          VITE_BASE_URL: 'u3com-app-test'
           VITE_ENV: 'test'
         run: |
           bun install --frozen-lockfile
@@ -57,6 +57,7 @@ jobs:
       - name: Deploy Gh-Pages 🚀
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          deploy_key: ${{ secrets.GH_TEST }}
+          external_repository: u3com/u3com-app-test
           publish_dir: ./dist
         #   cname: app.u3.com

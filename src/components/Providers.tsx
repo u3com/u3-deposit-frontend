@@ -120,26 +120,27 @@ function OnWalletStats() {
   return null
 }
 export function Providers({ children }: { children: React.ReactNode }) {
+
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={qClient}>
         <RainbowKitProvider theme={darkTheme()} modalSize="compact" locale="en">
           <TronWalletProvider disableAutoConnectOnLoad adapters={adapters}>
             <TronWalletModalProvider>
-              <SolConnectionProvider
+              {/* <SolConnectionProvider
                 endpoint={NetInfos[`solana:${defSolChainId}`].rpc!}
                 config={{
                   confirmTransactionInitialTimeout: 60000,
                   commitment: 'confirmed'
                 }}
-              >
+              > */}
                 <SolWalletProvider wallets={solWallets} autoConnect>
                   <SolWalletModalProvider>
                     <OnWalletStats />
                     {children}
                   </SolWalletModalProvider>
                 </SolWalletProvider>
-              </SolConnectionProvider>
+              {/* </SolConnectionProvider> */}
             </TronWalletModalProvider>
           </TronWalletProvider>
         </RainbowKitProvider>
