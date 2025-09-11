@@ -13,15 +13,14 @@ import { Configs, NetInfos, type CaipNetID, type ChainType } from '@/config'
 import { isProd, isTest } from '@/env'
 import { getUserInfoBy, upDepositHash } from '@/lib/apis'
 import { genPromise, handleError, toNumber, type UnPromise } from '@/lib/mutils'
-import { waitSolTxConfirmed } from '@/lib/sol'
 import { waitTronTx } from '@/lib/tron'
 import { cn } from '@/lib/utils'
 import { type U3Deposit } from '@/solfile/u3_deposit'
 import idlU3Deposit from '@/solfile/u3_deposit.json'
 import { AnchorProvider, BN, Program, setProvider } from '@coral-xyz/anchor'
 import {
-  getAssociatedTokenAddress,
   getAccount,
+  getAssociatedTokenAddress,
   TOKEN_PROGRAM_ID,
 } from '@solana/spl-token'
 import {
