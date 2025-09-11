@@ -13,6 +13,7 @@ import { Configs, NetInfos, type CaipNetID, type ChainType } from '@/config'
 import { isProd, isTest } from '@/env'
 import { getUserInfoBy, upDepositHash } from '@/lib/apis'
 import { genPromise, handleError, toNumber, type UnPromise } from '@/lib/mutils'
+import { waitSolTxConfirmed } from '@/lib/sol'
 import { waitTronTx } from '@/lib/tron'
 import { cn } from '@/lib/utils'
 import { type U3Deposit } from '@/solfile/u3_deposit'
@@ -126,7 +127,7 @@ function App() {
   const depositBySol: DepositFun = async (amountBn, email, config) => {
     if (!solW) throw new Error('Need connected!')
     console.info('sol wallet:', solW.publicKey.toString(), solW, idlU3Deposit)
-    const provider = new AnchorProvider(solConn.connection, solW, { commitment: 'confirmed'})
+    const provider = new AnchorProvider(solConn.connection, solW, { commitment: 'confirmed' })
     setProvider(provider)
     const program = new Program<U3Deposit>(idlU3Deposit, provider)
     const depositPool = new PublicKey(config.deposit)
@@ -169,7 +170,7 @@ function App() {
     const amountBN = new BN(amountBn.toString())
     console.info('amount:', amountBN, amountBN.toString())
     // deposit
-    const tx = await program.methods
+    const txHash = await program.methods
       .deposit(amountBN, email)
       .accountsPartial({
         userDeposit,
@@ -181,8 +182,10 @@ function App() {
         user: solW.publicKey,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
-      .transaction()
-    return await provider.sendAndConfirm(tx)
+      .signers([])
+      .rpc()
+    // await waitSolTxConfirmed(solConn.connection, txHash)
+    return txHash
   }
 
   const depositByTron: DepositFun = async (amountBn, email, config, netId) => {
