@@ -50,14 +50,12 @@ import {
   defSolChainId,
   defTronChainId,
   LocalKeys,
-  NetInfos,
-  type ChainType,
+  type ChainType
 } from '@/config'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import {
-  ConnectionProvider as SolConnectionProvider,
   WalletProvider as SolWalletProvider,
-  useWallet as useSolWallet,
+  useWallet as useSolWallet
 } from '@solana/wallet-adapter-react'
 import { WalletModalProvider as SolWalletModalProvider } from '@solana/wallet-adapter-react-ui'
 import '@solana/wallet-adapter-react-ui/styles.css'
@@ -127,20 +125,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <RainbowKitProvider theme={darkTheme()} modalSize="compact" locale="en">
           <TronWalletProvider disableAutoConnectOnLoad adapters={adapters}>
             <TronWalletModalProvider>
-              {/* <SolConnectionProvider
-                endpoint={NetInfos[`solana:${defSolChainId}`].rpc!}
-                config={{
-                  confirmTransactionInitialTimeout: 60000,
-                  commitment: 'confirmed'
-                }}
-              > */}
                 <SolWalletProvider wallets={solWallets} autoConnect>
                   <SolWalletModalProvider>
                     <OnWalletStats />
                     {children}
                   </SolWalletModalProvider>
                 </SolWalletProvider>
-              {/* </SolConnectionProvider> */}
             </TronWalletModalProvider>
           </TronWalletProvider>
         </RainbowKitProvider>
