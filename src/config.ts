@@ -57,12 +57,12 @@ export const NetInfos: {
 } = {
   [`solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`]: {
     name: 'Solana Devnet',
-    rpc: 'https://devnet.helius-rpc.com/?api-key=4af995ed-5529-4453-943e-e67c85fbc5f1',
+    rpc: 'https://devnet.helius-rpc.com/?api-key=9046f5e8-6fae-47e7-b2bc-c8b8beb9eda1',
     isTest: true,
   },
   [`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp`]: {
     name: 'Solana',
-    rpc: 'https://mainnet.helius-rpc.com/?api-key=4af995ed-5529-4453-943e-e67c85fbc5f1',
+    rpc: 'https://mainnet.helius-rpc.com/?api-key=9046f5e8-6fae-47e7-b2bc-c8b8beb9eda1',
   },
   [`eip155:${bscTestnet.id}`]: { name: bscTestnet.name, isTest: true },
   [`eip155:${bsc.id}`]: { name: bsc.name },
